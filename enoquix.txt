@@ -1,0 +1,82 @@
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE IF NOT EXISTS `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `email_id` varchar(200) NOT NULL,
+  `password` varchar(64) NOT NULL,
+  `first_name` varchar(128) NOT NULL,
+  `last_name` varchar(128) NOT NULL,
+  `enabled` bit(1) DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+);
+
+DROP TABLE IF EXISTS `user_singin_logs`;
+CREATE TABLE IF NOT EXISTS `user_singin_logs`(
+  `user_id` int(11) NOT NULL,
+  `session_id` varchar(128) NOT NULL,
+  `signed_in_time` timestamp NOT NULL,
+  `signed_out_time` timestamp NOT NULL,
+   PRIMARY KEY (`session_id`),
+   FOREIGN KEY (`user_id`) REFERENCES users (`user_id`)
+); 
+
+
+
+Insert value for table users
+INSERT INTO `enoquix`.`users` (`user_id`, `email_id`, `password`, `first_name`, `last_name`, `enabled`) VALUES ('12345', 'naz@gmail.com', '12345', 'naz', 'ren', NULL);
+
+INSERT INTO `enoquix`.`users` (`user_id`, `email_id`, `password`, `first_name`, `last_name`, `enabled`) VALUES ('23456', 'ren@gmail.com', '23456', 'O', 'ren', NULL);
+
+INSERT INTO `enoquix`.`users` (`user_id`, `email_id`, `password`, `first_name`, `last_name`, `enabled`) VALUES ('45678', 'aedy@gmail.com', '45678', 'ae', 'dy', NULL);
+
+INSERT INTO `enoquix`.`users` (`user_id`, `email_id`, `password`, `first_name`, `last_name`, `enabled`) VALUES ('56789', 'az@gmail.com', '56789', 'az', 'ren', NULL);
+
+
+Insert value for table user_signing
+INSERT INTO `enoquix`.`user_singin_logs` (`user_id`, `session_id`, `signed_in_time`, `signed_out_time`) VALUES ('12345', '54321', '2017-01-01 01:00:00', '2017-01-01 05:00:00');
+INSERT INTO `enoquix`.`user_singin_logs` (`user_id`, `session_id`, `signed_in_time`, `signed_out_time`) VALUES ('23456', '65432', '2017-02-01 01:00:00', '2017-02-01 05:00:00');
+INSERT INTO `enoquix`.`user_singin_logs` (`user_id`, `session_id`, `signed_in_time`, `signed_out_time`) VALUES ('45678', '87654', '2017-03-01 01:00:00', '2017-03-01 05:00:00');
+INSERT INTO `enoquix`.`user_singin_logs` (`user_id`, `session_id`, `signed_in_time`, `signed_out_time`) VALUES ('56789', '98765', '2017-04-01 01:00:00', '2017-04-01 05:00:00');
+
+
+Question 2
+
+SELECT users.user_id,user_singin_logs.signed_in_time,user_singin_logs.signed_out_time 
+FROM 
+  users LEFT OUTER JOIN user_singin_logs
+    ON users.user_id = user_singin_logs.user_id
+
+UNION 
+
+SELECT users.user_id,user_singin_logs.signed_in_time,user_singin_logs.signed_out_time 
+FROM 
+ 	users RIGHT OUTER JOIN user_singin_logs
+     ON users.user_id = user_singin_logs.user_id
+ORDER BY user_id DESC;
+
+Question 3
+
+
+ALTER TABLE users
+DROP PRIMARY KEY;
+
+SELECT SUM(user_id)
+          AS NumUniqueUser
+  FROM (
+       SELECT COUNT(DISTINCT user_id) AS user_id
+         FROM users
+       UNION 
+       SELECT COUNT(DISTINCT user_id) AS user_id
+         FROM user_singin_logs
+       ) AS u;
+
+Question 4
+
+SELECT user_id,COUNT(*) AS Num_Duplicate_Existed FROM
+(
+SELECT user_id FROM users
+UNION ALL
+SELECT user_id FROM user_singin_logs
+)AS Num_UniqueUser
+GROUP BY user_id
+HAVING COUNT(*)>1; 
+
